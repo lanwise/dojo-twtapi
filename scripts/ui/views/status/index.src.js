@@ -8,26 +8,32 @@ define(['jquery','xing/http'],function($,http) {
 
     $page.on('scriptloaded',function() {
         if( !loaded ) {
-            http.get('~/mock/status.js',{},function( results ) {
-                
-                
-                results = $.parseJSON(results);
+            navigator.geolocation.getCurrentPosition(function(geocode){console.log(geocode)
+            $geo = "&geocode="+geocode.coords.latitude+","+geocode.coords.longitude+",1km";
+            url = 'http://jonasporto.info/twitteroauth/?q='+$geo;
+            //url = '~/mock/status.js';
+            http.get(url,{},function( results ) {
+                //results = $.parseJSON(results);
                 $.each( results[0].statuses, function( index, data ) {
-                console.log(data.user.name);
-                   var $clone      = $statusListHtml.clone(),
-                        $emailLink  = $('<a />').attr('href','http://twitter.com/'+data.user.screen_name).html(data.user.screen_name);
 
-                    $clone.find('.username').html(data.user.name);
-                    $clone.find('.email').append($emailLink);
-                    /*$clone.find('.fullname').html(data.FirstName+' '+user.MiddleName+' '+user.LastName);
-                    $clone.find('.user-link').data('target','#!/user/view?id='+user.Id);*/
+                   var $clone    = $statusListHtml.clone(),
+                    $userLink    = $('<a />').attr('href','https://twitter.com/'+data.user.screen_name).html('@'+data.user.screen_name);
+                    $statusLink  = $('<a target="_blank" />').attr('href','https://twitter.com/'+data.user.screen_name+'/status/'+data.id_str).html('Detalhes');
+                    $clone.find('.screen_name').html($userLink);
+                    $clone.find('.text').html(data.text);
+                    $clone.find('.created_at').append(data.created_at);
+                    $clone.find('.status-link').html($statusLink);
+                    console.log($container);
                     $container.append($clone);
                 });
                 loaded  = true;
             });
+
+            });
+
         }
         else {
-            http.message("already loaded, let's not reload automatically");
+            http.message("Content already loaded, let's not reload automatically");
         }
     } );
 
